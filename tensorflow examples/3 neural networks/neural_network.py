@@ -41,7 +41,6 @@ x_train, x_test = x_train/255., x_test/255.
 # %% Use tf.data API to shuffle and batch data
 train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 train_data = train_data.repeat().shuffle(5000).batch(batch_size).prefetch(1)
-
 # %% Create TF Model
 
 
@@ -65,6 +64,7 @@ class NeuralNet(Model):
             # tf cross entropy expect logits without soffmax, so only
             # apply softmax when not training.
             x = tf.nn.softmax(x)
+        
         return x
 
 
@@ -74,8 +74,6 @@ neural_net = NeuralNet()
 # %% cross entropy Loss
 
 # note that this will apply softmax to the digits
-
-
 def cross_entropy_loss(x, y):
     # convert labels to int64 for tf cross-entropy fuction
     y = tf.cast(y, tf.int64)
@@ -85,8 +83,6 @@ def cross_entropy_loss(x, y):
     return tf.reduce_mean(loss)
 
 # Accuracy metric
-
-
 def accuracy(y_pred, y_true):
     # predicted class is the index of highest score in prediction vector(i,e, argmax)
     correct_prediction = tf.equal(
@@ -137,14 +133,16 @@ print("Test Accuracy: %f" % accuracy(pred, y_test))
 import matplotlib.pyplot as plt
 
 # %% predict 5 image from valiation set
-n_images = 30
-test_images = x_test[:n_images]
-test_answers = y_test[:n_images]
+n_images = 1000
+n_images_index = np.random.randint(0,x_test.shape[0],(n_images),dtype=np.int32)
+test_images = x_test[n_images_index]
+test_answers = y_test[n_images_index]
 predictions = neural_net(test_images)
 
 # display image and model prediction
 
 for i in range(n_images):
-    plt.imshow(np.reshape(test_images[i], [28, 28]), cmap='gray')
-    plt.show()
-    print("Model Prediction: %i, answer: %i" % (np.argmax(predictions.numpy()[i]), test_answers[i]))
+    if(np.argmax(predictions.numpy()[i]) != test_answers[i]):
+        plt.imshow(np.reshape(test_images[i], [28, 28]), cmap='gray')
+        plt.show()
+        print("Model Prediction: %i, answer: %i" % (np.argmax(predictions.numpy()[i]), test_answers[i]))
