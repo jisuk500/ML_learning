@@ -28,7 +28,7 @@ env = gym.make('FrozenLake-v0')
 input_size = env.observation_space.n
 output_size = env.action_space.n
 hidden_n = 50;
-learning_rate = 1.0
+learning_rate = 0.1
 
 def one_hot(x):
     return np.identity(16)[x:x+1]
@@ -46,7 +46,7 @@ class NeuralNet(Model):
         super(NeuralNet,self).__init__()
         # first fully connected layer
         #self.fc1 = layers.Dense(hidden_n,activation=tf.nn.relu)
-        self.out = layers.Dense(output_size,activation=tf.nn.relu,use_bias=False)
+        self.out = layers.Dense(output_size,activation=None,use_bias=False,)
         
     def call(self,x):
         #x = self.fc1(x)
