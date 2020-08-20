@@ -48,7 +48,7 @@ train_data = train_data.repeat().shuffle(5000).batch(batch_size).prefetch(1)
 random_normal = tf.initializers.RandomNormal()
 
 weights = {
-    'h1': tf.Variable((random_normal([num_features, n_hidden_1]))),
+    'h1': tf.Variable(random_normal([num_features, n_hidden_1])),
     'h2': tf.Variable(random_normal([n_hidden_1, n_hidden_2])),
     'out': tf.Variable(random_normal([n_hidden_2, num_classes]))
 }
