@@ -27,7 +27,8 @@ env = gym.make('FrozenLake-v0')
 # %% Q-network parameters
 input_size = env.observation_space.n
 output_size = env.action_space.n
-hidden_n = 50;
+hidden_n1 = 50;
+hidden_n2 = 50;
 learning_rate = 0.1
 
 def one_hot(x):
@@ -45,11 +46,13 @@ class NeuralNet(Model):
     def __init__(self):
         super(NeuralNet,self).__init__()
         # first fully connected layer
-        #self.fc1 = layers.Dense(hidden_n,activation=tf.nn.relu)
+        self.fc1 = layers.Dense(hidden_n1,activation=tf.nn.relu)
+        self.fc2 = layers.Dense(hidden_n2,activation=tf.nn.relu)
         self.out = layers.Dense(output_size,activation=None,use_bias=False,)
         
     def call(self,x):
-        #x = self.fc1(x)
+        x = self.fc1(x)
+        x = self.fc2(x)
         x = self.out(x)
         return x
 
