@@ -66,7 +66,7 @@ def run_optimization(x,y):
         # loss
         loss = get_loss(x,y)
     
-    trainable_variables = neural_net.trainable_variables;
+    trainable_variables = neural_net.trainable_variables
     gradients = g.gradient(loss,trainable_variables)
     optimizer.apply_gradients(zip(gradients, trainable_variables))
 
