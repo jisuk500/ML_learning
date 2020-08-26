@@ -33,41 +33,44 @@ dis = 0.9
 rList = []
 
 
-
 # %% prepare Q network
 
 class NeuralNet(Model):
     # set layers
     def __init__(self):
-        super(NeuralNet,self).__init__()
-        self.fc1 = layers.Dense(n_hidden_1,activation=tf.nn.sigmoid,use_bias=True)
-        self.fc2 = layers.Dense(n_hidden_2,activation=tf.nn.sigmoid,use_bias=True)
-        self.out = layers.Dense(output_size,activation=None,use_bias=False)
-    
-    def call(self,x):
+        super(NeuralNet, self).__init__()
+        self.fc1 = layers.Dense(
+            n_hidden_1, activation=tf.nn.sigmoid, use_bias=True)
+        self.fc2 = layers.Dense(
+            n_hidden_2, activation=tf.nn.sigmoid, use_bias=True)
+        self.out = layers.Dense(output_size, activation=None, use_bias=False)
+
+    def call(self, x):
         x = self.fc1(x)
         x = self.fc2(x)
         x = self.out(x)
         return x
 
 
-def get_loss(X,Y):
+def get_loss(X, Y):
     return tf.reduce_sum(tf.square(Y - X))
+
 
 neural_net = NeuralNet()
 optimizer = tf.optimizers.SGD(learning_rate)
 
 # %% prepare run optimization of Q network
 
-def run_optimization(x,y):
+
+def run_optimization(x, y):
     with tf.GradientTape() as g:
         # forward
         x = neural_net(x)
         # loss
-        loss = get_loss(x,y)
-    
+        loss = get_loss(x, y)
+
     trainable_variables = neural_net.trainable_variables
-    gradients = g.gradient(loss,trainable_variables)
+    gradients = g.gradient(loss, trainable_variables)
     optimizer.apply_gradients(zip(gradients, trainable_variables))
 
 
@@ -79,51 +82,50 @@ for i in range(num_episodes):
     step_count = 0
     s = env.reset()
     done = False
-    
+
     # The Q-Network training
     while not done:
         step_count += 1
         x = np.reshape(s, [1, input_size])
         # choose an action by greedily (with chance of e)
         Qs = neural_net(x).numpy()
-        if np.random.rand(1) < e :
+        if np.random.rand(1) < e:
             a = env.action_space.sample()
         else:
             a = np.argmax(Qs)
-        
+
         # get new state and reward from environment
         s1, reward, done, _ = env.step(a)
         if done:
-            Qs[0,a] = -100
-        else: 
+            Qs[0, a] = -100
+        else:
             x1 = np.reshape(s1, [1, input_size])
             # obtain the Q values by feeding the new state through our network
             Qs1 = neural_net(x1).numpy()
-            Qs[0,a] = reward + dis * np.max(Qs1)
-        
+            Qs[0, a] = reward + dis * np.max(Qs1)
+
         run_optimization(tf.constant(x), tf.constant(Qs))
         s = s1
-    
+
     rList.append(step_count)
-    print("Episode: {} steps: {}".format(i,step_count))
-    
+    print("Episode: {} steps: {}".format(i, step_count))
+
     # if last 10's avg steps are 500, it's good enough
-    if len(rList) > 10 and np.mean(rList[-10:])>500:
+    if len(rList) > 10 and np.mean(rList[-10:]) > 500:
         break
 
 # %% see our trained network in action
-observation  = env.reset()
+observation = env.reset()
 reward_sum = 0
 while True:
     env.render()
-    
+
     x = np.reshape(observation, [1, input_size])
     Qs = neural_net(x).numpy()
     a = np.argmax(Qs)
-    
+
     observation, reward, done, _ = env.step(a)
     reward_sum += reward
     if done:
         print("total score: {}".format(reward_sum))
         break
-

@@ -74,13 +74,17 @@ def train_network(net, x, y):
 
 
 optimizer = tf.optimizers.Adam(learning_rate)
+
 mainDQN = NeuralNet()
+targetDQN = NeuralNet()
+targetDQN.set_weights(mainDQN.get_weights())
+
 resultDQN = NeuralNet()
 
 # %% train from replay buffer
 
 
-def simple_replay_train(DQN, train_batch):
+def simple_replay_train(mainDQN_, targetDQN_, train_batch):
     x_stack = np.empty(0).reshape(0, input_size)
     y_stack = np.empty(0).reshape(0, output_size)
 
@@ -89,14 +93,15 @@ def simple_replay_train(DQN, train_batch):
         state = state.reshape([1, -1])
         next_state = next_state.reshape([1, -1])
 
-        Q = DQN(state).numpy()
+        Q = mainDQN_(state).numpy()
 
         # terminal?
         if done:
             Q[0, action] = reward
         else:
             # obtain the 'Q' values by feeding  the new state through our network
-            Q[0, action] = reward + dis * np.max(DQN(next_state).numpy())
+            Q[0, action] = reward + dis * \
+                np.max(targetDQN_(next_state).numpy())
 
         y_stack = np.vstack([y_stack, Q])
         x_stack = np.vstack([x_stack, state])
@@ -105,7 +110,7 @@ def simple_replay_train(DQN, train_batch):
     x_stack = x_stack.astype(np.float32)
     y_stack = y_stack.astype(np.float32)
 
-    return train_network(DQN, tf.constant(x_stack), tf.constant(y_stack))
+    return train_network(mainDQN_, tf.constant(x_stack), tf.constant(y_stack))
 
 # %% bot play
 
@@ -141,8 +146,8 @@ def main():
     success_count = 0
     best_loss = 99999999
     global resultDQN
+    global mainDQN
 
-    global resultDQN
     for episode in range(max_episodes):
         resultDQN = mainDQN
         e = 1.0/((episode / 10) + 1)
@@ -188,13 +193,15 @@ def main():
             for _ in range(50):
                 # minibatch works betters
                 minibatch = random.sample(replay_buffer, 10)
-                loss = simple_replay_train(mainDQN, minibatch)
+                loss = simple_replay_train(mainDQN, targetDQN, minibatch)
 
+            targetDQN.set_weights(mainDQN.get_weights())
             print("loss: {}".format(loss))
 
             if best_loss > loss:
                 best_loss = loss
-                resultDQN.set_weights(mainDQN.get_weights())
+                resultDQN.set_weights(targetDQN.get_weights())
+                print("saved new!")
 
             if success_count >= 9:
                 break
