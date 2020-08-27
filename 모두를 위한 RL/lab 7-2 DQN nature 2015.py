@@ -210,8 +210,8 @@ def main():
                 success_count = 0
 
     return mainDQN
-# %% do learning
 
+# %% do learning
 
 mainDQN = main()
 
