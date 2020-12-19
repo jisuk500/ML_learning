@@ -173,7 +173,7 @@ def main():
 
         state = env.reset()
         
-        # env.render()
+        env.render()
         
         history_state = initialize_state_history(state)
 
@@ -191,7 +191,7 @@ def main():
             next_state, reward, done, _ = env.step(action)
             next_history_state = update_state_history(history_state, next_state)
             
-           # env.render()
+            env.render()
 
             # save the experience to our buffer
             replay_buffer.append((history_state, action, reward, next_history_state, done))
