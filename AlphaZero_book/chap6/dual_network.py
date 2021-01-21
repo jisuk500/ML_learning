@@ -40,9 +40,9 @@ def residual_block():
 
 #%% 듀얼 네트워크 생성
 
-def dual_network():
+def dual_network(model_path="./model/best.h5"):
     # 모델 생성이 완료된 경우, 처리하지 않음
-    if os.path.exists('best.h5'):
+    if os.path.exists(model_path):
         return
     
     # 입력 레이어
@@ -72,7 +72,7 @@ def dual_network():
     model = Model(inputs=input, outputs=[p,v])
     
     # 모델 저장
-    model.save('best.h5') # 베스트 플레이어 모델
+    model.save(model_path) # 베스트 플레이어 모델
     
     return model
     # # 모델 삭제

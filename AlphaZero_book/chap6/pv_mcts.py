@@ -148,7 +148,7 @@ def pv_mcts_scores(model, state, temperature):
 #%% 동작 확인
 if __name__ == "__main__":
     # 모델 로드
-    path = Path('best.h5')
+    path = Path('./model/best.h5')
     model = load_model(str(path))
     
     # 상태 생성

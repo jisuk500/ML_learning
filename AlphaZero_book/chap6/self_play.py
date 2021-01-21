@@ -38,7 +38,7 @@ def first_player_value(ended_state):
 def write_data(history):
     now = datetime.now()
     os.makedirs('./data/',exist_ok=True) # 폴더가 없는 경우에는 생성
-    path = './data/{:04}{:02}{:02}{:02}{:02}{:02}'.format(
+    path = './data/{:04}{:02}{:02}{:02}{:02}{:02}.history'.format(
         now.year, now.month, now.day, now.hour, now.minute, now.second)
     with open(path, mode='wb') as f:
         pickle.dump(history, f)
@@ -87,7 +87,7 @@ def self_play():
     history = []
     
     # 베스트 플레이어 모델 로드
-    model = load_model('best.h5')
+    model = load_model('./model/best.h5')
     
     # 여러 차례 게임 실행
     for i in range(SP_GAME_COUNT):
